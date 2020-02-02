@@ -67,12 +67,12 @@ public class MerkleTreeComparator {
 	public static void main(String[] args) {
 		
 		//TODO: remove this
-		args = new String[2];
-		args[0] = "D:\\output\\merkle_hash_tree_1580619092037.ser";
-		args[1] = "D:\\output\\merkle_hash_tree_1580622712427.ser";
+//		args = new String[2];
+//		args[0] = "D:\\output\\merkle_hash_tree_1580619092037.ser";
+//		args[1] = "D:\\output\\merkle_hash_tree_1580622712427.ser";
 		
 		if (args.length != 2) {
-			System.out.println("Usages: MerkleTreeComparator <base object file path> <another object file path>");
+			System.out.println("Usage: MerkleTreeComparator <base object file path> <another object file path>");
 			System.exit(0);
 		}
 

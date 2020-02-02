@@ -165,9 +165,9 @@ public class MerkleTreeGenerator extends SimpleFileVisitor<Path> {
 	public static void main(String[] args) throws Exception {
 		
 		//TODO: remove this
-		args = new String[2];
-		args[0] = "D:\\test3";
-		args[1] = "D:\\output";
+//		args = new String[2];
+//		args[0] = "D:\\test3";
+//		args[1] = "D:\\output";
 		
 		if (args.length != 2) {
 			System.out.println("Usages: MerkleTreeGenerator <root dir> <export dir>");
