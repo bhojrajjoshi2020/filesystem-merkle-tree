@@ -2,6 +2,11 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.xml.bind.annotation.XmlAttribute;
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlRootElement;
+
+@XmlRootElement
 public class FileHashNode implements Serializable {
 
 	private static final long serialVersionUID = 1L;
@@ -9,6 +14,9 @@ public class FileHashNode implements Serializable {
 	private String hash = null;
 	private List<FileHashNode> children = new ArrayList<>();
 	private FileHashNode parent = null;
+
+	private FileHashNode() {
+	}
 
 	public FileHashNode(String filePath) {
 		this.filePath = filePath;
@@ -25,18 +33,7 @@ public class FileHashNode implements Serializable {
 		this.children.addAll(children);
 	}
 
-	public List<FileHashNode> getChildren() {
-		return children;
-	}
-
-	public String getFilePath() {
-		return filePath;
-	}
-
-	public void setFilePath(String filePath) {
-		this.filePath = filePath;
-	}
-
+	@XmlAttribute
 	public String getHash() {
 		return hash;
 	}
@@ -45,12 +42,26 @@ public class FileHashNode implements Serializable {
 		this.hash = hash;
 	}
 
-	private void setParent(FileHashNode parent) {
-		this.parent = parent;
+	@XmlElement
+	public List<FileHashNode> getChildren() {
+		return children;
+	}
+
+	@XmlAttribute
+	public String getFilePath() {
+		return filePath;
+	}
+
+	public void setFilePath(String filePath) {
+		this.filePath = filePath;
 	}
 
 	public FileHashNode getParent() {
 		return parent;
+	}
+
+	private void setParent(FileHashNode parent) {
+		this.parent = parent;
 	}
 
 	public String toString() {

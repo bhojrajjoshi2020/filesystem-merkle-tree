@@ -42,10 +42,8 @@ public class MerkleTreeComparator {
 		return fileHashNode;
 	}
 
-	public List<FileHashNode> compare(FileHashNode baseNode, FileHashNode anotherNode) {
-		List<FileHashNode> faultyNodes = new ArrayList<FileHashNode>();
-
-		if (baseNode.getHash().equals(anotherNode.getHash())) {
+	public List<FileHashNode> compareTrees(FileHashNode baseNode, FileHashNode anotherNode, List<FileHashNode> faultyNodes) {
+		if (!baseNode.getHash().equals(anotherNode.getHash())) {
 			Iterator<FileHashNode> baseItr = baseNode.getChildren().iterator();
 			Iterator<FileHashNode> anotherItr = anotherNode.getChildren().iterator();
 
@@ -56,9 +54,6 @@ public class MerkleTreeComparator {
 					faultyNodes.add(baseNext);
 				}
 			}
-
-		} else {
-			faultyNodes.add(baseNode);
 		}
 
 		return faultyNodes;
@@ -80,13 +75,13 @@ public class MerkleTreeComparator {
 		String anotherFilePath = args[1];
 
 		MerkleTreeComparator comparator = new MerkleTreeComparator();
-		FileHashNode baseNode = comparator.deserialize(baseFilePath);
+		FileHashNode baseTree = comparator.deserialize(baseFilePath);
 		FileHashNode anotherNode = comparator.deserialize(anotherFilePath);
-
-		List<FileHashNode> faultyNodes = comparator.compare(baseNode, anotherNode);
+		List<FileHashNode> faultyNodes = new ArrayList<FileHashNode>();
+		comparator.compareTrees(baseTree, anotherNode, faultyNodes);
 
 		if (faultyNodes.isEmpty()) {
-			System.out.println("Both the objects are equal!");
+			System.out.println("Both objects are equal!");
 		} else {
 			System.out.println("Below are the faulty nodes:");
 			for (FileHashNode faultyNode : faultyNodes) {

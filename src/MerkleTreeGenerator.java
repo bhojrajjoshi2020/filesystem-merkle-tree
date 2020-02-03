@@ -18,6 +18,9 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.Marshaller;
+
 public class MerkleTreeGenerator extends SimpleFileVisitor<Path> {
 	private static final String HASHING_ALGORITHM = "SHA-256";
 
@@ -34,15 +37,6 @@ public class MerkleTreeGenerator extends SimpleFileVisitor<Path> {
 		digest = MessageDigest.getInstance(HASHING_ALGORITHM);
 	}
 
-	// Prints the total number of
-	// matches to standard out.
-	void done() {
-		System.out.println("Total nodes visited: " + nodesVisited);
-		printTree(rootNode, " ");
-	}
-
-	// Invoke the pattern matching
-	// method on each file.
 	@Override
 	public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
 		FileHashNode newNode = new FileHashNode(file.toString());
@@ -55,8 +49,6 @@ public class MerkleTreeGenerator extends SimpleFileVisitor<Path> {
 		return CONTINUE;
 	}
 
-	// Invoke the pattern matching
-	// method on each directory.
 	@Override
 	public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) {
 		if (!dir.equals(rootDir)) {
@@ -139,7 +131,7 @@ public class MerkleTreeGenerator extends SimpleFileVisitor<Path> {
 		return sb.toString();
 	}
 
-	public void exportResult(Path exportFilePath) {
+	public void serializeTree(Path exportFilePath) {
 		try {
 			// Saving of object in a file
 			FileOutputStream fos = new FileOutputStream(exportFilePath.toFile());
@@ -157,18 +149,29 @@ public class MerkleTreeGenerator extends SimpleFileVisitor<Path> {
 		}
 	}
 
-	private static void printTree(FileHashNode node, String appender) {
-		System.out.println(appender + node);
-		node.getChildren().forEach(each -> printTree(each, appender + "  "));
+	public void printTree(String appender) {
+		_printTreeInText(rootNode, appender);
 	}
-	
+
+	private void _printTreeInText(FileHashNode node, String appender) {
+		System.out.println(appender + node);
+		node.getChildren().forEach(each -> _printTreeInText(each, appender + "  "));
+	}
+
+	public void exportTreeToXml(Path exportTreePath) throws Exception {
+		JAXBContext contextObj = JAXBContext.newInstance(FileHashNode.class);
+		Marshaller marshallerObj = contextObj.createMarshaller();
+		marshallerObj.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
+		marshallerObj.marshal(rootNode, new FileOutputStream(exportTreePath.toFile()));
+	}
+
 	public static void main(String[] args) throws Exception {
-		
-		//TODO: remove this
+
+//		TODO: remove this
 //		args = new String[2];
-//		args[0] = "D:\\test3";
+//		args[0] = "D:\\test";
 //		args[1] = "D:\\output";
-		
+
 		if (args.length != 2) {
 			System.out.println("Usages: MerkleTreeGenerator <root dir> <export dir>");
 			System.exit(0);
@@ -176,14 +179,21 @@ public class MerkleTreeGenerator extends SimpleFileVisitor<Path> {
 
 		String rootDir = args[0];
 		String exportDir = args[1];
-		Path exportFilePath = Paths.get(exportDir, "merkle_hash_tree_" + System.currentTimeMillis() + ".ser");
-		System.out.println("Generating merkle tree for root dir: " + rootDir);
 
 		Path startingDir = Paths.get(rootDir);
+		Path exportPath = Paths.get(exportDir, String.valueOf(System.currentTimeMillis()));
+		Files.createDirectory(exportPath);
+		Path serializeTreePath = Paths.get(exportPath.toString(),
+				startingDir.getFileName().toString() + "_merkle_hash_tree.ser");
+		Path exportTreePath = Paths.get(exportPath.toString(),
+				startingDir.getFileName().toString() + "_merkle_hash_tree.xml");
+
+		System.out.println("Generating merkle tree from root dir: " + rootDir);
 		MerkleTreeGenerator generator = new MerkleTreeGenerator(startingDir);
 		Files.walkFileTree(startingDir, generator);
-		generator.done();
-		generator.exportResult(exportFilePath);
-		System.out.println("Exported the result to: " + exportFilePath);
+		generator.printTree(" ");
+		generator.exportTreeToXml(exportTreePath);
+		generator.serializeTree(serializeTreePath);
+		System.out.println("Exported the results to: " + exportPath.toString());
 	}
 }
